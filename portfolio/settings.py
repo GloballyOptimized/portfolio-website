@@ -11,7 +11,7 @@ DEBUG = os.getenv("DEBUG", "true").lower() == "true"
 ALLOWED_HOSTS = [
     "globallyoptimized.cloud",
     "www.globallyoptimized.cloud",
-    "*.railway.app",
+    ".railway.app",
     "localhost",
     "127.0.0.1",
 ]
@@ -20,6 +20,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://globallyoptimized.cloud",
     "https://www.globallyoptimized.cloud",
     "https://*.railway.app",
+    "https://*.up.railway.app",
 ]
 
 INSTALLED_APPS = [
