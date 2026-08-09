@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}experience — ayush suryawanshi{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">experience</h1>
+<p class="page-sub">4 years building production systems across ai, backend, and infrastructure.</p>
+
+{% for job in experience %}
+<div class="exp-item">
+  <div class="exp-header">
+    <span class="exp-title">{{ job.title }}</span>
+    <span class="exp-date">{{ job.start }} – {{ job.end }}</span>
+  </div>
+  <div class="exp-company">{{ job.company }} · {{ job.location }}</div>
+  <ul class="exp-bullets">
+    {% for bullet in job.bullets %}
+    <li>{{ bullet }}</li>
+    {% endfor %}
+  </ul>
+  <div class="tag-row">
+    {% for tag in job.tags %}
+    <span class="tag">{{ tag }}</span>
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+
+
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}stack — ayush suryawanshi{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">tech stack</h1>
+<p class="page-sub">tools i use, trust, and have shipped to production.</p>
+
+<div class="stack-grid">
+  {% for category, items in skills.items() %}
+  <div class="stack-category">
+    <h3>{{ category }}</h3>
+    <div class="stack-items">
+      {% for item in items %}
+      <span class="stack-item">{{ item }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

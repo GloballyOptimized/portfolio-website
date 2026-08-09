@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+{% block title %}inventory whisperer — ayush suryawanshi{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── kpi strip ──────────────────────────────────────────────── */
+  .iw-kpis {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 640px) { .iw-kpis { grid-template-columns: 1fr 1fr; } }
+
+  .iw-kpi {
+    padding: 0.75rem 1rem;
+    border-right: 1px solid var(--border);
+  }
+
+  .iw-kpi:last-child { border-right: none; }
+
+  .iw-kpi-label {
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 0.3rem;
+  }
+
+  .iw-kpi-value {
+    font-size: 1rem;
+    color: var(--text);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── source badge ───────────────────────────────────────────── */
+  .iw-source {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    margin-bottom: 1.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    flex-wrap: wrap;
+  }
+
+  .iw-source-label {
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  .iw-source a { color: var(--text-muted); text-decoration: underline; text-underline-offset: 2px; }
+  .iw-source a:hover { color: var(--text); }
+
+  /* ── section ────────────────────────────────────────────────── */
+  .iw-section { margin-bottom: 2rem; }
+
+  .iw-section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .iw-section-title {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+  }
+
+  .iw-section-sub {
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  /* ── chart ──────────────────────────────────────────────────── */
+  .iw-chart {
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 0.75rem;
+    overflow: hidden;
+  }
+
+  /* ── tables ─────────────────────────────────────────────────── */
+  .iw-table-wrap {
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow-x: auto;
+  }
+
+  .iw-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+  }
+
+  .iw-table th {
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .iw-table td {
+    padding: 0.45rem 0.75rem;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .iw-table tr:last-child td { border-bottom: none; }
+  .iw-table tr:hover td { color: var(--text); }
+
+  .iw-desc {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text) !important;
+  }
+
+  .iw-badge {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .iw-badge.rising  { color: #5a5; border-color: #243; }
+  .iw-badge.falling { color: #a55; border-color: #422; }
+  .iw-badge.stable  { color: var(--text-dim); }
+
+  .iw-empty {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-style: italic;
+    padding: 0.5rem 0;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">inventory whisperer</h1>
+<p class="page-sub">demand signals · ABC classification · reorder watchlist · demand projection</p>
+
+<!-- KPI strip -->
+<div class="iw-kpis">
+  <div class="iw-kpi">
+    <div class="iw-kpi-label">total skus</div>
+    <div class="iw-kpi-value">{{ kpis.total_skus or '—' }}</div>
+  </div>
+  <div class="iw-kpi">
+    <div class="iw-kpi-label">active skus (60d)</div>
+    <div class="iw-kpi-value">{{ kpis.active_skus or '—' }}</div>
+  </div>
+  <div class="iw-kpi">
+    <div class="iw-kpi-label">a-class skus</div>
+    <div class="iw-kpi-value">{{ kpis.a_class_skus or '—' }}</div>
+  </div>
+  <div class="iw-kpi">
+    <div class="iw-kpi-label">total revenue</div>
+    <div class="iw-kpi-value">{{ kpis.total_revenue or '—' }}</div>
+  </div>
+  <div class="iw-kpi">
+    <div class="iw-kpi-label">total orders</div>
+    <div class="iw-kpi-value">{{ kpis.total_orders or '—' }}</div>
+  </div>
+</div>
+
+<!-- Data source -->
+<div class="iw-source">
+  <span class="iw-source-label">data source</span>
+  <span>
+    <a href="https://archive.ics.uci.edu/dataset/502/online+retail+ii" target="_blank" rel="noopener">UCI Online Retail II</a>
+    · Dr. Daqing Chen, London South Bank University
+    · Dec 2009 – Dec 2011 · UK gift/homeware retailer · 1,067,371 transactions
+    · also on <a href="https://www.kaggle.com/datasets/mashlyn/online-retail-ii-uci" target="_blank" rel="noopener">Kaggle</a>
+  </span>
+</div>
+
+<!-- Demand projection chart -->
+<div class="iw-section">
+  <div class="iw-section-head">
+    <span class="iw-section-title">demand projection</span>
+    <span class="iw-section-sub">actual → projected Jan–Mar 2012 · top 8 A-class SKUs · linear trend extrapolation</span>
+  </div>
+  <div class="iw-chart" id="iw-proj-chart"></div>
+</div>
+
+<!-- Reorder watchlist + Slow movers -->
+<div>
+
+  <div class="iw-section">
+    <div class="iw-section-head">
+      <span class="iw-section-title">reorder watchlist</span>
+      <span class="iw-section-sub">high-velocity A/B-class · last 60d</span>
+    </div>
+    <div class="iw-table-wrap">
+      <table class="iw-table">
+        <thead>
+          <tr>
+            <th>sku</th><th>description</th><th>recent</th><th>prior</th><th>trend</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if watchlist.reorder %}
+            {% for r in watchlist.reorder %}
+            <tr>
+              <td>{{ r.stock_code }}</td>
+              <td class="iw-desc" title="{{ r.description }}">{{ r.description or '—' }}</td>
+              <td>{{ r.recent_units }}</td>
+              <td>{{ r.prior_units }}</td>
+              <td><span class="iw-badge {{ r.trend }}">{{ r.trend }}</span></td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr><td colspan="5" class="iw-empty">no high-velocity items found.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="iw-section">
+    <div class="iw-section-head">
+      <span class="iw-section-title">slow movers</span>
+      <span class="iw-section-sub">A/B-class SKUs with dropping demand</span>
+    </div>
+    <div class="iw-table-wrap">
+      <table class="iw-table">
+        <thead>
+          <tr>
+            <th>sku</th><th>description</th><th>recent</th><th>prior</th><th>trend</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if watchlist.slow_movers %}
+            {% for s in watchlist.slow_movers %}
+            <tr>
+              <td>{{ s.stock_code }}</td>
+              <td class="iw-desc" title="{{ s.description }}">{{ s.description or '—' }}</td>
+              <td>{{ s.recent_units }}</td>
+              <td>{{ s.prior_units }}</td>
+              <td><span class="iw-badge {{ s.trend }}">{{ s.trend }}</span></td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr><td colspan="5" class="iw-empty">no slow movers identified.</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+<script>
+const _projData = {{ projection|safe }};
+
+(function() {
+  if (!_projData || !_projData.length) return;
+
+  const el = document.getElementById('iw-proj-chart');
+  const w  = el.clientWidth - 32 || 680;
+
+  const spec = {
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "width":  w,
+    "height": 260,
+    "data": {"values": _projData},
+    "mark": {"type": "line", "point": {"filled": true, "size": 35}},
+    "encoding": {
+      "x": {
+        "field": "month", "type": "ordinal", "title": null,
+        "sort": null,
+        "axis": {
+          "labelColor": "#666", "gridColor": "#1c1c1c",
+          "domainColor": "#333", "tickColor": "#333",
+          "labelAngle": -45, "labelFontSize": 10
+        }
+      },
+      "y": {
+        "field": "units", "type": "quantitative", "title": "units",
+        "axis": {
+          "labelColor": "#666", "titleColor": "#555",
+          "gridColor": "#1c1c1c", "domainColor": "#333",
+          "tickColor": "#333", "labelFontSize": 10
+        }
+      },
+      "color": {
+        "field": "product", "type": "nominal",
+        "legend": {
+          "labelColor": "#888", "titleColor": "#555",
+          "labelLimit": 240, "labelFontSize": 11,
+          "orient": "bottom", "columns": 3
+        }
+      },
+      "opacity": {
+        "condition": {"test": "datum.type === 'projected'", "value": 0.4},
+        "value": 1
+      },
+      "strokeDash": {
+        "condition": {"test": "datum.type === 'projected'", "value": [6, 3]},
+        "value": [1, 0]
+      },
+      "tooltip": [
+        {"field": "product", "title": "product"},
+        {"field": "month",   "title": "month"},
+        {"field": "units",   "title": "units"},
+        {"field": "type",    "title": "type"}
+      ]
+    },
+    "config": {
+      "background": "transparent",
+      "view": {"stroke": "transparent"},
+      "font": "JetBrains Mono, monospace"
+    }
+  };
+
+  vegaEmbed('#iw-proj-chart', spec, {actions: false, renderer: 'svg'}).catch(console.error);
+})();
+</script>
+{% endblock %}

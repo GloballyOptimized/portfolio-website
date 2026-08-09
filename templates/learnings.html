@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}learnings — ayush suryawanshi{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">learnings</h1>
+<p class="page-sub">where i studied and what i picked up along the way.</p>
+
+<div class="edu-block" style="margin-top: 0; border-top: none; padding-top: 0;">
+  <p class="section-label">education</p>
+  <div class="edu-header">
+    <span class="edu-degree">{{ education.degree }}</span>
+    <span class="edu-years">{{ education.years }}</span>
+  </div>
+  <div class="edu-uni">{{ education.university }} · {{ education.location }}</div>
+  <div class="edu-cgpa">CGPA {{ education.cgpa }} / 10</div>
+</div>
+
+<div class="edu-block">
+  <p class="section-label">books</p>
+  {% for book in books %}
+  <div class="book-item">
+    <span class="book-title">{{ book.title }}</span>
+    <span class="book-author">{{ book.author }}</span>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="edu-block">
+  <p class="section-label">blogs & vlogs</p>
+  {% for item in blogs_and_vlogs %}
+  <div class="book-item">
+    <a href="{{ item.url }}" target="_blank" rel="noopener" class="book-title">{{ item.title }}</a>
+    <span class="resource-type">{{ item.type }}</span>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

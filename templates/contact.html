@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}contact — ayush suryawanshi{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">contact</h1>
+<p class="page-sub">open to interesting problems. not open to cold recruiter spam.</p>
+
+<div class="section">
+  <div class="contact-list">
+    <div class="contact-row">
+      <span class="contact-label">email</span>
+      <span class="contact-value"><a href="mailto:{{ profile.email }}">{{ profile.email }}</a></span>
+    </div>
+    <div class="contact-row">
+      <span class="contact-label">linkedin</span>
+      <span class="contact-value"><a href="{{ profile.linkedin }}" target="_blank" rel="noopener">linkedin.com/in/ayush-suryawanshi-4b7290206</a></span>
+    </div>
+    <div class="contact-row">
+      <span class="contact-label">github</span>
+      <span class="contact-value"><a href="{{ profile.github }}" target="_blank" rel="noopener">github.com/GloballyOptimized</a></span>
+    </div>
+    <div class="contact-row">
+      <span class="contact-label">x</span>
+      <span class="contact-value"><a href="{{ profile.x }}" target="_blank" rel="noopener">x.com/globlyoptimized</a></span>
+    </div>
+    <div class="contact-row">
+      <span class="contact-label">phone</span>
+      <span class="contact-value">{{ profile.phone }}</span>
+    </div>
+    <div class="contact-row">
+      <span class="contact-label">location</span>
+      <span class="contact-value">{{ profile.location }}</span>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

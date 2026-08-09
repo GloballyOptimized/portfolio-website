@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}blog — ayush suryawanshi{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/blog.css" />{% endblock %}
+
+{% block content %}
+
+<div class="blog-header">
+  <h1>blog</h1>
+  <p class="blog-sub">thoughts on ai infrastructure, backend systems, and engineering. usually goes to x, sometimes here.</p>
+</div>
+
+<div class="post-list">
+  {% for post in posts %}
+  <a href="/blog/{{ post.slug }}" class="post-item">
+    <span class="post-title">{{ post.title }}</span>
+    <span class="post-date">{{ post.date }}</span>
+  </a>
+  {% endfor %}
+</div>
+
+{% endblock %}

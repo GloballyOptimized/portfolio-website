@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}ayush suryawanshi — builds things{% endblock %}
+
+{% block content %}
+
+<div class="hero">
+  <h1>ayush suryawanshi</h1>
+  <p class="tagline">builds things. ai infrastructure. senior software engineer.</p>
+  <div class="hero-links">
+    <a href="/experience">experience</a>
+    <a href="/projects">projects</a>
+    <a href="/stack">stack</a>
+    <a href="/blog">blog</a>
+    <a href="https://github.com/GloballyOptimized" target="_blank" rel="noopener">github</a>
+    <a href="https://linkedin.com/in/ayush-suryawanshi" target="_blank" rel="noopener">linkedin</a>
+    <a href="mailto:suryawanshiayush007@gmail.com">email</a>
+  </div>
+</div>
+
+<div class="section">
+  <p class="section-label">currently</p>
+  <p style="font-size: 0.825rem; color: var(--text-muted); line-height: 1.7;">
+    Senior Software Engineer at
+    <a href="/experience" style="color: var(--text-muted); text-decoration: underline;">Innoviti Technologies</a>
+    — designing production AI systems from the ground up. inference infrastructure on 96 GB VRAM, real-time fraud detection across 21,000+ merchants, and internal platforms that replaced entire operational workflows.
+  </p>
+</div>
+
+<div class="section">
+  <p class="section-label">notable projects</p>
+  <div class="quick-list">
+    {% for project in projects %}
+    <div class="quick-item">
+      <a href="{{ project.url }}" target="_blank" rel="noopener" class="quick-name">{{ project.name }}</a>
+      <span class="quick-impact">{{ project.short_desc }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  <a href="/projects" class="all-link">all projects →</a>
+</div>
+
+<div class="section">
+  <p class="section-label">from the blog</p>
+  <div class="quick-list">
+    {% for post in posts %}
+    <div class="quick-item">
+      <a href="/blog/{{ post.slug }}" class="quick-name">{{ post.title }}</a>
+      <span class="quick-impact">{{ post.date }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  <a href="/blog" class="all-link">all posts →</a>
+</div>
+
+{% endblock %}

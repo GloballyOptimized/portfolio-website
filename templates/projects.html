@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}projects — ayush suryawanshi{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">projects</h1>
+<p class="page-sub">production-grade ai systems. real problems, real data, real scale.</p>
+
+<div class="project-list">
+  {% for project in projects %}
+  {% if project.category == 'portfolio' %}
+  <div class="project-item">
+    <div class="project-top">
+      <span class="project-name">{{ project.name }}</span>
+      <a href="{{ project.url }}" {% if not project.url.startswith('/') %}target="_blank" rel="noopener"{% endif %} class="project-link">visit →</a>
+    </div>
+    <p class="project-short">{{ project.short_desc }}</p>
+    <p class="project-desc">{{ project.desc }}</p>
+    <div class="tag-row">
+      {% for tag in project.tags %}
+      <span class="tag">{{ tag }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+
+{% endblock %}

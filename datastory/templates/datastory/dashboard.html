@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block title %}datastory — ayush suryawanshi{% endblock %}
+
+{% block extra_css %}
+<style>
+  .ds-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .ds-kpi {
+    border: 1px solid var(--border);
+    padding: 1rem;
+    border-radius: 4px;
+  }
+  .ds-kpi-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.35rem;
+  }
+  .ds-kpi-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .ds-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin: 0.5rem 0 1.5rem;
+  }
+  .ds-views {
+    margin: 1.5rem 0;
+  }
+  .ds-view-item {
+    display: flex;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.8rem;
+  }
+  .ds-view-name {
+    font-family: monospace;
+    color: var(--text);
+    min-width: 140px;
+  }
+  .ds-view-desc { color: var(--text-muted); }
+  .ds-query-box {
+    margin: 1.5rem 0;
+  }
+  .ds-query-box textarea {
+    width: 100%;
+    font-family: monospace;
+    font-size: 0.8rem;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.75rem;
+    border-radius: 4px;
+    resize: vertical;
+    min-height: 90px;
+    box-sizing: border-box;
+  }
+  .ds-query-box button {
+    margin-top: 0.5rem;
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .ds-result {
+    margin-top: 1rem;
+    overflow-x: auto;
+    font-size: 0.75rem;
+  }
+  .ds-result table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  .ds-result th, .ds-result td {
+    text-align: left;
+    padding: 0.4rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .ds-result th { color: var(--text-muted); font-weight: normal; }
+  .ds-error { color: #e05; font-size: 0.8rem; margin-top: 0.5rem; }
+  .ds-starters { margin: 1rem 0; }
+  .ds-starter {
+    display: inline-block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.25rem 0.6rem;
+    margin: 0.2rem;
+    cursor: pointer;
+  }
+  .ds-starter:hover { color: var(--text); border-color: var(--text); }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">datastory</h1>
+<p class="page-sub">live analytics on the Online Retail II dataset — {{ dataset.rows | format_number }} transactions, {{ dataset.date_range[0] }} to {{ dataset.date_range[1] }}.</p>
+
+<div class="ds-kpis">
+  <div class="ds-kpi">
+    <div class="ds-kpi-label">total revenue</div>
+    <div class="ds-kpi-value">{{ kpis.total_revenue }}</div>
+  </div>
+  <div class="ds-kpi">
+    <div class="ds-kpi-label">total orders</div>
+    <div class="ds-kpi-value">{{ kpis.total_orders }}</div>
+  </div>
+  <div class="ds-kpi">
+    <div class="ds-kpi-label">customers</div>
+    <div class="ds-kpi-value">{{ kpis.total_customers }}</div>
+  </div>
+  <div class="ds-kpi">
+    <div class="ds-kpi-label">avg order value</div>
+    <div class="ds-kpi-value">{{ kpis.avg_order_value }}</div>
+  </div>
+</div>
+
+<p class="section-label" style="margin-top:2rem;">available views</p>
+<div class="ds-views">
+  {% for name, desc in views.items() %}
+  <div class="ds-view-item">
+    <span class="ds-view-name">{{ name }}</span>
+    <span class="ds-view-desc">{{ desc }}</span>
+  </div>
+  {% endfor %}
+</div>
+
+<p class="section-label" style="margin-top:2rem;">run a query</p>
+<div class="ds-starters">
+  {% for q in starter_questions %}
+  <span class="ds-starter" onclick="setSql(this)">{{ q }}</span>
+  {% endfor %}
+</div>
+
+<div class="ds-query-box">
+  <textarea id="sql-input" placeholder="SELECT Country, ROUND(SUM(line_revenue),2) AS revenue FROM retail_clean GROUP BY Country ORDER BY revenue DESC LIMIT 10"></textarea>
+  <button onclick="runQuery()">run →</button>
+  <div class="ds-error" id="ds-error"></div>
+</div>
+
+<div class="ds-result" id="ds-result"></div>
+
+<script>
+const STARTER_SQLS = {
+  "Monthly revenue trend for 2011": "SELECT month, month_name, ROUND(SUM(revenue),2) AS revenue FROM monthly_revenue WHERE year=2011 GROUP BY month, month_name ORDER BY month",
+  "Top 10 products by revenue": "SELECT StockCode, Description, ROUND(SUM(line_revenue),2) AS revenue FROM retail_clean WHERE StockCode NOT IN ('POST','D','M','AMAZONFEE','BANK CHARGES','C2','DOT') GROUP BY StockCode, Description ORDER BY revenue DESC LIMIT 10",
+  "RFM distribution of customers": "SELECT NTILE(4) OVER (ORDER BY recency_days DESC) AS r_quartile, NTILE(4) OVER (ORDER BY frequency) AS f_quartile, COUNT(*) AS customers FROM customer_rfm GROUP BY r_quartile, f_quartile ORDER BY r_quartile, f_quartile",
+  "UK vs rest of world revenue split": "SELECT CASE WHEN Country='United Kingdom' THEN 'UK' ELSE 'Rest of World' END AS region, ROUND(SUM(line_revenue),2) AS revenue FROM retail_clean GROUP BY region ORDER BY revenue DESC",
+  "Cancellation rate over time": "SELECT year, month, month_name, ROUND(100.0*SUM(is_cancellation::INT)/COUNT(*),2) AS cancellation_rate_pct FROM retail GROUP BY year, month, month_name ORDER BY year, month",
+  "Top 5 countries by number of orders": "SELECT Country, COUNT(DISTINCT Invoice) AS orders FROM retail_clean GROUP BY Country ORDER BY orders DESC LIMIT 5",
+  "Highest revenue month overall": "SELECT year, month_name, ROUND(SUM(revenue),2) AS revenue FROM monthly_revenue GROUP BY year, month, month_name ORDER BY revenue DESC LIMIT 1",
+  "Repeat vs one-time customer split": "SELECT CASE WHEN frequency=1 THEN 'one-time' ELSE 'repeat' END AS customer_type, COUNT(*) AS customers FROM customer_rfm GROUP BY customer_type",
+};
+
+function setSql(el) {
+  const sql = STARTER_SQLS[el.textContent.trim()];
+  if (sql) document.getElementById('sql-input').value = sql;
+}
+
+async function runQuery() {
+  const sql = document.getElementById('sql-input').value.trim();
+  const errEl = document.getElementById('ds-error');
+  const resultEl = document.getElementById('ds-result');
+  errEl.textContent = '';
+  resultEl.innerHTML = '<p style="color:var(--text-muted);font-size:0.8rem">running...</p>';
+
+  try {
+    const res = await fetch('/datastory/api/query/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+      body: JSON.stringify({ sql }),
+    });
+    const data = await res.json();
+    if (data.error) { errEl.textContent = data.error; resultEl.innerHTML = ''; return; }
+    if (!data.rows.length) { resultEl.innerHTML = '<p style="color:var(--text-muted);font-size:0.8rem">no rows returned</p>'; return; }
+
+    const cols = Object.keys(data.rows[0]);
+    let html = `<p style="color:var(--text-muted);font-size:0.75rem;margin-bottom:0.5rem">${data.count} row${data.count !== 1 ? 's' : ''}</p><table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;
+    for (const row of data.rows) {
+      html += `<tr>${cols.map(c=>`<td>${row[c] ?? ''}</td>`).join('')}</tr>`;
+    }
+    html += '</tbody></table>';
+    resultEl.innerHTML = html;
+  } catch (e) {
+    errEl.textContent = 'Request failed: ' + e.message;
+    resultEl.innerHTML = '';
+  }
+}
+
+function getCookie(name) {
+  const val = `; ${document.cookie}`;
+  const parts = val.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return '';
+}
+</script>
+
+{% endblock %}
