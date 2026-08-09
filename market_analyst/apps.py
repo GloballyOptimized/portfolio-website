@@ -7,5 +7,11 @@ class MarketAnalystConfig(AppConfig):
     verbose_name = "Market Analyst"
 
     def ready(self):
-        from .core.database import init_db
-        init_db()
+        import logging
+        try:
+            from .core.database import init_db
+            init_db()
+        except Exception as e:
+            logging.getLogger(__name__).warning(
+                "[market_analyst] DB init skipped at startup: %s", e
+            )
