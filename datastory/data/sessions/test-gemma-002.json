@@ -1,1 +1,0 @@
-{"session_id": "test-gemma-002", "created_at": "2026-08-08T18:23:22.561200+00:00", "updated_at": "2026-08-08T18:23:32.447020+00:00", "history": [{"role": "user", "content": "how many total orders are there"}, {"role": "assistant", "content": "There are a total of 41,939 orders in the dataset."}]}
